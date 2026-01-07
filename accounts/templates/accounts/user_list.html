@@ -1,0 +1,35 @@
+<!-- accounts/templates/accounts/user_list.html -->
+{% extends "films/base.html" %}
+{% load gravatar %}
+
+{% block content %}
+<h1>Пользователи</h1>
+
+<div class="row">
+{% for user in users %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body d-flex align-items-center">
+                {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="rounded-circle me-3" width="50" height="50" style="object-fit: cover;">
+                {% else %}
+                    <img src="{% gravatar_url user.email 50 %}" alt="{{ user.username }}" class="rounded-circle me-3" width="50" height="50">
+                {% endif %}
+                <div>
+                    <h5 class="card-title mb-1">
+                        <a href="{% url 'accounts:public_profile' user.id %}" class="text-decoration-none">
+                            {{ user.username }}
+                        </a>
+                    </h5>
+                    {% if user.email %}
+                        <small class="text-muted">{{ user.email }}</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% empty %}
+    <p>Нет пользователей.</p>
+{% endfor %}
+</div>
+{% endblock %}
