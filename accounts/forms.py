@@ -1,7 +1,8 @@
 # accounts/forms.py
 from django import forms
 from django.contrib.auth.models import User
-from .models import Profile
+from django.core.exceptions import ValidationError
+from .models import Conversation, Profile
 
 class ProfileForm(forms.ModelForm):
     # Поля из модели User
@@ -43,3 +44,40 @@ class ProfileForm(forms.ModelForm):
         if commit:
             profile.save()
         return profile
+    
+    
+class GroupChatCreateForm(forms.ModelForm):
+    name = forms.CharField(
+        max_length=100,
+        label="Название группы"
+    )
+    participants = forms.ModelMultipleChoiceField(
+        queryset=User.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        label="Участники"
+    )
+
+    class Meta:
+        model = Conversation
+        fields = ['name']
+
+    def __init__(self, *args, **kwargs):
+        self.current_user = kwargs.pop('current_user', None)
+        super().__init__(*args, **kwargs)
+        if self.current_user:
+            self.fields['participants'].queryset = User.objects.exclude(id=self.current_user.id)
+
+    def clean_participants(self):
+        participants = self.cleaned_data.get('participants')
+        if participants and len(participants) < 2:
+            raise ValidationError("Групповая беседа должна включать минимум 2 участников (помимо вас).")
+        return participants
+
+    def save(self, commit=True):
+        conversation = super().save(commit=False)
+        if commit:
+            conversation.save()
+            # Добавляем текущего пользователя + выбранных участников
+            selected_participants = list(self.cleaned_data['participants'])
+            conversation.participants.set(selected_participants + [self.current_user])
+        return conversation

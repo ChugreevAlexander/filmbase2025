@@ -1,0 +1,56 @@
+{% extends "films/base.html" %}
+{% block content %}
+<div class="container py-4">
+    <h1>Сообщения</h1>
+
+    <!-- Список сообщений -->
+    <div class="card mb-4" style="max-height: 500px; overflow-y: auto;">
+        {% for msg in messages %}
+            <div class="p-3 {% if msg.sender == request.user %}bg-light text-end{% endif %}">
+                <small class="text-muted">{{ msg.sender.username }}</small>
+                
+                {% if msg.content %}
+                    <div>{{ msg.content }}</div>  <!-- ← убран |linebreaks, т.к. markdown сам форматирует -->
+                {% endif %}
+                
+                {% if msg.files.exists %}
+                    <div class="mt-2">
+                        <strong>Файлы:</strong>
+                        <ul class="list-unstyled mb-0">
+                            {% for file in msg.files.all %}
+                                <li>
+                                    {% if file.file.url|slice:"-4:" in ".jpg.png.gif.jpeg" %}
+                                        <img src="{{ file.file.url }}" class="img-thumbnail me-2" style="max-height: 80px;">
+                                    {% else %}
+                                        <a href="{{ file.file.url }}" class="me-2">
+                                            📎 {{ file.file.name }}
+                                        </a>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
+                <small class="text-muted">{{ msg.created_at|date:"d.m.Y H:i" }}</small>
+            </div>
+        {% empty %}
+            <div class="p-3">Нет сообщений.</div>
+        {% endfor %}
+    </div>
+
+    <!-- Форма отправки (вне цикла!) -->
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-2">
+            <textarea name="content" class="form-control" placeholder="Введите сообщение" rows="2"></textarea>
+        </div>
+        <div class="mb-2">
+            <label for="files">Прикрепить файлы:</label>
+            <input type="file" name="files" multiple class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Отправить</button>
+        <a href="{% url 'accounts:conversation_list' %}" class="btn btn-secondary">Назад</a>
+    </form>
+</div>
+{% endblock %}

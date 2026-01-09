@@ -1,0 +1,31 @@
+{% extends "films/base.html" %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+<div class="container py-4">
+    <h1>Создать групповую беседу</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+            {% if form.name.errors %}
+                <div class="text-danger">{{ form.name.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.participants.label_tag }}
+            {{ form.participants }}
+            {% if form.participants.errors %}
+                <div class="text-danger">{{ form.participants.errors }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Создать группу</button>
+        <a href="{% url 'accounts:conversation_list' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

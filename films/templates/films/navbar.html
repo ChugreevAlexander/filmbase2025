@@ -28,17 +28,18 @@
               <a href="{% url 'accounts:profile' %}" class="nav-link">{{ user.username }}</a>
             </li>
             <li class="nav-item">
+              <a href="{% url 'accounts:conversation_list' %}" class="nav-link">
+                Сообщения
+                  {% if unread_messages_count > 0 %}
+                    <span class="badge bg-danger rounded-pill ms-1">{{ unread_messages_count }}</span>
+                  {% endif %}
+              </a>
+            </li>
+            <li class="nav-item">
               <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
                 <button type="submit" class="nav-link">Выйти</button>
               </form>
-            </li>
-          {% else %}
-            <li class="nav-item">
-              <a href="{% url 'login' %}" class="nav-link">
-                <i class="box-arrow-in-right"></i>
-                Войти
-              </a>
             </li>
           {% endif %}
         </ul>
